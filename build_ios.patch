@@ -1,0 +1,24 @@
+diff --git a/config/ios/ios_sdk_overrides.gni b/config/ios/ios_sdk_overrides.gni
+index a2373c6c9..8171c6da8 100644
+--- a/config/ios/ios_sdk_overrides.gni
++++ b/config/ios/ios_sdk_overrides.gni
+@@ -15,3 +15,5 @@ declare_args() {
+ if (!is_ios) {
+   assert(ios_deployment_target == "15.0" || true)
+ }
++
++if (is_ios) { ios_automatically_manage_certs = true }
+\ No newline at end of file
+diff --git a/config/ios/rules.gni b/config/ios/rules.gni
+index 9cb3002c8..533deb29e 100644
+--- a/config/ios/rules.gni
++++ b/config/ios/rules.gni
+@@ -767,7 +767,7 @@ template("ios_app_bundle") {
+           data_deps = []
+         }
+         if (build_with_chromium) {
+-          data_deps += [ "//testing/iossim" ]
++          
+         }
+       }
+     }
