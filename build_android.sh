@@ -29,21 +29,26 @@ gclient sync --revision="$REV"
 cd "$PDFIUM_DIR"
 git apply "$PATCH_1"
 
-TARGET_CPU="arm64"
-for cpu in $TARGET_CPU; do
-    echo "####### Building for $cpu #######"
+CONFIGURATIONS="arm64"
+for CONFIG in $CONFIGURATIONS; do
+    echo "#############################"
+    echo "CONFIG: $CONFIG"
+    echo "#############################"
+    if [ "$CONFIG" = "arm64" ]; then
+        CPU="arm64"
+    fi
     # Build
-    TARGET_BUILD_DIR="$BUILD_DIR/$cpu"
+    TARGET_BUILD_DIR="$BUILD_DIR/$CONFIG"
     rm -rf "$TARGET_BUILD_DIR"
     mkdir -p "$TARGET_BUILD_DIR"
     cp "$ARGS" "$TARGET_BUILD_DIR/args.gn"
-    echo "target_cpu = \"$cpu\"" >> "$TARGET_BUILD_DIR/args.gn"
+    echo "target_cpu = \"$CPU\"" >> "$TARGET_BUILD_DIR/args.gn"
     echo "target_os = \"android\"" >> "$TARGET_BUILD_DIR/args.gn"
     gn gen "$TARGET_BUILD_DIR"
     ninja -C "$TARGET_BUILD_DIR" pdfium
 
     # Install
-    INSTALL_DIR="$PDFIUM_DIR/../install/$cpu"
+    INSTALL_DIR="$PDFIUM_DIR/../install/$CONFIG"
 
     # Install headers
     INCLUDE_DIR="$INSTALL_DIR/include/pdfium"

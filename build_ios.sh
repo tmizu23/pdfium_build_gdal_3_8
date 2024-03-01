@@ -34,56 +34,65 @@ git apply "$PATCH_1"
 (cd build; git apply "$PATCH_2")
 
 cd "$PDFIUM_DIR"
-TARGET_CPU="arm64"
-TARGET_ENVIRONMENT="device simulator"
-for cpu in $TARGET_CPU; do
-  for environment in $TARGET_ENVIRONMENT; do
-      echo "####### Building for $cpu-$environment #######"
-      # Build
-      TARGET_BUILD_DIR="$BUILD_DIR/$cpu/$environment"
-      rm -rf "$TARGET_BUILD_DIR"
-      mkdir -p "$TARGET_BUILD_DIR"
-      cp "$ARGS" "$TARGET_BUILD_DIR/args.gn"
-      echo "target_cpu = \"$cpu\"" >> "$TARGET_BUILD_DIR/args.gn"
-      echo "target_environment = \"$environment\"" >> "$TARGET_BUILD_DIR/args.gn"
-      gn gen "$TARGET_BUILD_DIR"
-      ninja -C "$TARGET_BUILD_DIR" pdfium
 
-      # Install
-      INSTALL_DIR="$PDFIUM_DIR/../install/$cpu/$environment"
+CONFIGURATIONS="iphoneos_arm64 iphonesimulator_arm64"
+for CONFIG in $CONFIGURATIONS; do
+    echo "#############################"
+    echo "CONFIG: $CONFIG"
+    echo "#############################"
+    if [ "$CONFIG" = "iphoneos_arm64" ]; then
+        CPU="arm64"
+        ENVIRONMENT="device"
+    elif [ "$CONFIG" = "iphonesimulator_arm64" ]; then
+        CPU="arm64"
+        ENVIRONMENT="simulator"
+    fi
+    
+    # Build
+    TARGET_BUILD_DIR="$BUILD_DIR/$CONFIG"
+    rm -rf "$TARGET_BUILD_DIR"
+    mkdir -p "$TARGET_BUILD_DIR"
+    cp "$ARGS" "$TARGET_BUILD_DIR/args.gn"
+    echo "target_cpu = \"$CPU\"" >> "$TARGET_BUILD_DIR/args.gn"
+    echo "target_environment = \"$ENVIRONMENT\"" >> "$TARGET_BUILD_DIR/args.gn"
+    gn gen "$TARGET_BUILD_DIR"
+    ninja -C "$TARGET_BUILD_DIR" pdfium
 
-      # Install headers
-      INCLUDE_DIR="$INSTALL_DIR/include/pdfium"
-      mkdir -p "$INCLUDE_DIR"
-      cp -r public "$INCLUDE_DIR"
+    # Install
+    INSTALL_DIR="$PDFIUM_DIR/../install/$CONFIG"
 
-      HEADER_SUBDIRS="build constants fpdfsdk core/fxge core/fxge/agg core/fxge/dib core/fpdfdoc core/fpdfapi/parser core/fpdfapi/page core/fpdfapi/render core/fxcrt third_party/agg23 third_party/base third_party/base/numerics"
-      for subdir in $HEADER_SUBDIRS; do
-          mkdir -p "$INCLUDE_DIR/$subdir"
-          cp "$subdir"/*.h "$INCLUDE_DIR/$subdir"
-      done
+    # Install headers
+    INCLUDE_DIR="$INSTALL_DIR/include/pdfium"
+    mkdir -p "$INCLUDE_DIR"
+    cp -r public "$INCLUDE_DIR"
 
-      mkdir -p "$INCLUDE_DIR/third_party/abseil-cpp/absl/types"
-      cp third_party/abseil-cpp/absl/types/*.h "$INCLUDE_DIR/third_party/abseil-cpp/absl/types"
-      mkdir -p "$INCLUDE_DIR/third_party/base/containers"
-      cp third_party/base/containers/*.h "$INCLUDE_DIR/third_party/base/containers"
-      mkdir -p "$INCLUDE_DIR/absl/base"
-      cp third_party/abseil-cpp/absl/base/*.h "$INCLUDE_DIR/absl/base"
-      mkdir -p "$INCLUDE_DIR/absl/base/internal"
-      cp third_party/abseil-cpp/absl/base/internal/*.h "$INCLUDE_DIR/absl/base/internal"
-      mkdir -p "$INCLUDE_DIR/absl/meta"
-      cp third_party/abseil-cpp/absl/meta/*.h "$INCLUDE_DIR/absl/meta"
-      mkdir -p "$INCLUDE_DIR/absl/memory"
-      cp third_party/abseil-cpp/absl/memory/*.h "$INCLUDE_DIR/absl/memory"
-      mkdir -p "$INCLUDE_DIR/absl/types"
-      cp third_party/abseil-cpp/absl/types/*.h "$INCLUDE_DIR/absl/types"
-      mkdir -p "$INCLUDE_DIR/absl/types/internal"
-      cp third_party/abseil-cpp/absl/types/internal/*.h "$INCLUDE_DIR/absl/types/internal"
-      mkdir -p "$INCLUDE_DIR/absl/utility"
-      cp third_party/abseil-cpp/absl/utility/*.h "$INCLUDE_DIR/absl/utility"
+    HEADER_SUBDIRS="build constants fpdfsdk core/fxge core/fxge/agg core/fxge/dib core/fpdfdoc core/fpdfapi/parser core/fpdfapi/page core/fpdfapi/render core/fxcrt third_party/agg23 third_party/base third_party/base/numerics"
+    for subdir in $HEADER_SUBDIRS; do
+        mkdir -p "$INCLUDE_DIR/$subdir"
+        cp "$subdir"/*.h "$INCLUDE_DIR/$subdir"
+    done
 
-      # Install library
-      mkdir -p "$INSTALL_DIR/lib"
-      cp "$TARGET_BUILD_DIR/obj/libpdfium.a" "$INSTALL_DIR/lib"
-  done
+    mkdir -p "$INCLUDE_DIR/third_party/abseil-cpp/absl/types"
+    cp third_party/abseil-cpp/absl/types/*.h "$INCLUDE_DIR/third_party/abseil-cpp/absl/types"
+    mkdir -p "$INCLUDE_DIR/third_party/base/containers"
+    cp third_party/base/containers/*.h "$INCLUDE_DIR/third_party/base/containers"
+    mkdir -p "$INCLUDE_DIR/absl/base"
+    cp third_party/abseil-cpp/absl/base/*.h "$INCLUDE_DIR/absl/base"
+    mkdir -p "$INCLUDE_DIR/absl/base/internal"
+    cp third_party/abseil-cpp/absl/base/internal/*.h "$INCLUDE_DIR/absl/base/internal"
+    mkdir -p "$INCLUDE_DIR/absl/meta"
+    cp third_party/abseil-cpp/absl/meta/*.h "$INCLUDE_DIR/absl/meta"
+    mkdir -p "$INCLUDE_DIR/absl/memory"
+    cp third_party/abseil-cpp/absl/memory/*.h "$INCLUDE_DIR/absl/memory"
+    mkdir -p "$INCLUDE_DIR/absl/types"
+    cp third_party/abseil-cpp/absl/types/*.h "$INCLUDE_DIR/absl/types"
+    mkdir -p "$INCLUDE_DIR/absl/types/internal"
+    cp third_party/abseil-cpp/absl/types/internal/*.h "$INCLUDE_DIR/absl/types/internal"
+    mkdir -p "$INCLUDE_DIR/absl/utility"
+    cp third_party/abseil-cpp/absl/utility/*.h "$INCLUDE_DIR/absl/utility"
+
+    # Install library
+    mkdir -p "$INSTALL_DIR/lib"
+    cp "$TARGET_BUILD_DIR/obj/libpdfium.a" "$INSTALL_DIR/lib"
+
 done
