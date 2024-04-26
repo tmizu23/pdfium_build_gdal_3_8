@@ -21,7 +21,7 @@ else
   (cd "$DEPOT_TOOLS_DIR"; git checkout main; git pull)
 fi
 (cd "$DEPOT_TOOLS_DIR"; git checkout 1c4052d88ac510a3db4351e52c088cac524c726c)
-export PATH="$DEPOT_TOOLS_DIR:$PATH"
+export PATH="$DEPOT_TOOLS_DIR:$PDFIUM_DIR/third_party/depot_tools/:$PATH"
 
 # Checkout sources
 # From https://pdfium.googlesource.com/pdfium/
@@ -35,7 +35,7 @@ git apply "$PATCH_1"
 
 cd "$PDFIUM_DIR"
 
-CONFIGURATIONS="iphoneos_arm64 iphonesimulator_arm64"
+CONFIGURATIONS="iphoneos_arm64 iphonesimulator_arm64 iphonesimulator_x86_64"
 for CONFIG in $CONFIGURATIONS; do
     echo "#############################"
     echo "CONFIG: $CONFIG"
@@ -45,6 +45,9 @@ for CONFIG in $CONFIGURATIONS; do
         ENVIRONMENT="device"
     elif [ "$CONFIG" = "iphonesimulator_arm64" ]; then
         CPU="arm64"
+        ENVIRONMENT="simulator"
+    elif [ "$CONFIG" = "iphonesimulator_x86_64" ]; then
+        CPU="x64"
         ENVIRONMENT="simulator"
     fi
     
